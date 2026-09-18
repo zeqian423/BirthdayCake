@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Pixel Birthday · 像素生日蛋糕</title>
+<style>
+  :root{
+    --ink:#2a1b3d; --cream:#fff5d8; --pink:#ff7aa8; --pink2:#ffb6cc;
+    --cake:#f4b27a; --cake2:#e78b62; --plate:#8b6aa9; --bg:#17152d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;font-family:"Courier New",monospace}
+  body{
+    display:flex;align-items:center;justify-content:center;padding:24px;
+    color:var(--cream); background:
+      radial-gradient(circle at 50% 25%,#39315e 0 1px,transparent 2px) 0 0/18px 18px,
+      radial-gradient(circle at 20% 80%,#2d274c 0 1px,transparent 2px) 0 0/24px 24px,
+      var(--bg);
+    image-rendering:pixelated;
+  }
+  .shell{
+    width:min(920px,100%); border:6px solid var(--cream);
+    box-shadow:12px 12px 0 #080713; background:#211c3c;
+    padding:24px; position:relative;
+  }
+  .title{text-align:center;margin:0 0 6px;font-size:clamp(24px,5vw,46px);
+    color:#fff5d8;text-shadow:4px 4px 0 #a64f87;letter-spacing:2px}
+  .subtitle{text-align:center;color:#d8c9f0;margin:0 0 18px;font-size:13px}
+  .stage{
+    min-height:470px; display:flex;align-items:center;justify-content:center;
+    background:#29234a;border:4px solid #75649b;position:relative;overflow:hidden;
+  }
+  .stars{position:absolute;inset:0;pointer-events:none}
+  .stars i{position:absolute;width:4px;height:4px;background:#fff5d8;box-shadow:0 0 0 2px #fff5d8}
+  .cake-wrap{position:relative;width:390px;height:380px;display:flex;align-items:flex-end;justify-content:center}
+  .plate{position:absolute;bottom:26px;width:330px;height:30px;background:#a184c1;
+    border:5px solid var(--ink);box-shadow:8px 8px 0 #151025}
+  .cake{position:absolute;bottom:55px;width:280px;height:190px}
+  .tier{position:absolute;left:0;right:0;border:5px solid var(--ink);background:var(--cake);
+    box-shadow:7px 7px 0 #9a5d65}
+  .tier.bottom{bottom:0;height:112px}
+  .tier.top{bottom:92px;left:18px;right:18px;height:72px;background:#ffc68f}
+  .frost{position:absolute;top:-2px;left:-2px;right:-2px;height:27px;background:#fff0df;
+    border:5px solid var(--ink)}
+  .drip{position:absolute;width:18px;height:25px;background:#fff0df;border-left:5px solid var(--ink);
+    border-right:5px solid var(--ink);border-bottom:5px solid var(--ink)}
+  .drip.d1{left:45px;top:16px}.drip.d2{left:112px;top:16px;height:34px}.drip.d3{right:48px;top:16px;height:20px}
+  .sprinkle{position:absolute;width:9px;height:4px;border:2px solid var(--ink);background:#ff6f9e}
+  .s1{left:30px;bottom:48px}.s2{left:75px;bottom:25px}.s3{left:145px;bottom:50px}.s4{right:35px;bottom:35px}
+  .candle-row{position:absolute;bottom:165px;left:50%;transform:translateX(-50%);
+    display:flex;gap:25px;align-items:flex-end;z-index:5}
+  .candle{position:relative;width:22px;height:72px;border:4px solid var(--ink);
+    background:repeating-linear-gradient(0deg,#fff 0 10px,#ff7aa8 10px 20px)}
+  .candle:nth-child(2){height:92px;background:repeating-linear-gradient(0deg,#fff 0 10px,#7ed6c1 10px 20px)}
+  .candle:nth-child(3){height:80px;background:repeating-linear-gradient(0deg,#fff 0 10px,#ffd66b 10px 20px)}
+  .wick{position:absolute;top:-13px;left:50%;width:5px;height:13px;background:var(--ink);transform:translateX(-50%)}
+  .flame{position:absolute;left:50%;top:-40px;transform:translateX(-50%);width:18px;height:30px;
+    background:#ffd66b;border:4px solid var(--ink);clip-path:polygon(50% 0,75% 35%,100% 62%,78% 100%,30% 100%,0 62%,25% 35%);
+    animation:flicker .16s infinite alternate}
+  .flame:after{content:"";position:absolute;left:5px;top:8px;width:6px;height:12px;background:#ff8d5c}
+  .candle.off .flame{display:none}
+  .smoke{position:absolute;left:50%;top:-35px;width:5px;height:5px;background:#cfc7dc;display:none;
+    box-shadow:10px -12px 0 #cfc7dc,4px -24px 0 #cfc7dc}
+  .candle.off .smoke{display:block}
+  @keyframes flicker{from{transform:translateX(-50%) scale(.9) rotate(-2deg)}to{transform:translateX(-50%) scale(1.08) rotate(3deg)}}
+  .message{
+    position:absolute;top:22px;left:50%;transform:translateX(-50%);padding:10px 14px;
+    border:4px solid var(--ink);background:#fff5d8;color:var(--ink);font-weight:bold;
+    box-shadow:5px 5px 0 #151025;text-align:center;white-space:nowrap;font-size:13px
+  }
+  .controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+  button{
+    border:4px solid var(--ink);background:#ffb6cc;color:var(--ink);padding:12px 18px;
+    font:700 14px "Courier New",monospace;cursor:pointer;box-shadow:6px 6px 0 #0d0b18;
+    transition:transform .08s,box-shadow .08s
+  }
+  button:hover{filter:brightness(1.08)} button:active{transform:translate(4px,4px);box-shadow:2px 2px 0 #0d0b18}
+  #micBtn{background:#9de6d2} #status{margin-top:14px;text-align:center;color:#cfc7dc;font-size:12px;min-height:18px}
+  .hint{text-align:center;margin:16px auto 0;max-width:650px;color:#a99dbc;font-size:11px;line-height:1.7}
+  .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .confetti span{position:absolute;width:7px;height:12px;top:-20px;animation:fall 2.8s linear infinite}
+  @keyframes fall{to{transform:translateY(520px) rotate(540deg)}}
+  @media(max-width:560px){.shell{padding:14px}.stage{min-height:430px}.cake-wrap{transform:scale(.82)}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <h1 class="title">HAPPY BIRTHDAY!</h1>
+  <p class="subtitle">PIXEL CAKE · MAKE A WISH · BLOW OUT THE CANDLES</p>
+
+  <div class="stage" id="stage">
+    <div class="stars" id="stars"></div>
+    <div class="confetti" id="confetti"></div>
+    <div class="message" id="message">许个愿，然后对着麦克风吹气 ♡</div>
+
+    <div class="cake-wrap">
+      <div class="plate"></div>
+      <div class="cake">
+        <div class="tier bottom">
+          <div class="frost"></div><div class="drip d1"></div><div class="drip d2"></div><div class="drip d3"></div>
+          <i class="sprinkle s1"></i><i class="sprinkle s2"></i><i class="sprinkle s3"></i><i class="sprinkle s4"></i>
+        </div>
+        <div class="tier top"><div class="frost"></div></div>
+        <div class="candle-row" id="candles">
+          <div class="candle"><div class="wick"></div><div class="flame"></div><div class="smoke"></div></div>
+          <div class="candle"><div class="wick"></div><div class="flame"></div><div class="smoke"></div></div>
+          <div class="candle"><div class="wick"></div><div class="flame"></div><div class="smoke"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="micBtn">🎙 开启吹蜡烛</button>
+    <button id="relightBtn">🔥 再次点燃</button>
+  </div>
+  <div id="status">麦克风关闭 · 点击按钮后允许浏览器使用麦克风</div>
+  <p class="hint">吹气时音量超过阈值会自动熄灭蜡烛。再次点燃后可以继续许愿。<br>
+  麦克风只在当前页面运行，不会上传录音。</p>
+</div>
+
+<script>
+const candles = [...document.querySelectorAll('.candle')];
+const micBtn = document.getElementById('micBtn');
+const relightBtn = document.getElementById('relightBtn');
+const statusEl = document.getElementById('status');
+const message = document.getElementById('message');
+const confetti = document.getElementById('confetti');
+
+function extinguish(){
+  candles.forEach(c=>c.classList.add('off'));
+  message.textContent='愿望会实现的 ✦ HAPPY BIRTHDAY ✦';
+  burst();
+}
+function relight(){
+  candles.forEach(c=>c.classList.remove('off'));
+  message.textContent='许个愿，然后对着麦克风吹气 ♡';
+  statusEl.textContent = micOn ? '麦克风已开启 · 再吹一下试试' : '麦克风关闭 · 点击按钮后允许浏览器使用麦克风';
+}
+function burst(){
+  confetti.innerHTML='';
+  for(let i=0;i<34;i++){
+    const s=document.createElement('span');
+    s.style.left=(Math.random()*100)+'%';
+    s.style.animationDelay=(Math.random()*1.2)+'s';
+    s.style.transform='rotate('+(Math.random()*180)+'deg)';
+    s.style.background=['#ff7aa8','#ffd66b','#9de6d2','#c4a7ff','#fff5d8'][i%5];
+    confetti.appendChild(s);
+  }
+  setTimeout(()=>confetti.innerHTML='',3500);
+}
+document.getElementById('stars').innerHTML = Array.from({length:34},(_,i)=>{
+  const x=(i*37)%100, y=(i*61)%88, s=i%3?3:5;
+  return `<i style="left:${x}%;top:${y}%;width:${s}px;height:${s}px"></i>`;
+}).join('');
+
+relightBtn.addEventListener('click', relight);
+
+let audioCtx=null, analyser=null, data=null, micOn=false, raf=null, stream=null;
+let lastBlow=0;
+async function toggleMic(){
+  if(micOn){
+    micOn=false;
+    if(raf) cancelAnimationFrame(raf);
+    if(stream) stream.getTracks().forEach(t=>t.stop());
+    if(audioCtx) audioCtx.close();
+    micBtn.textContent='🎙 开启吹蜡烛';
+    statusEl.textContent='麦克风关闭';
+    return;
+  }
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const source=audioCtx.createMediaStreamSource(stream);
+    analyser=audioCtx.createAnalyser();
+    analyser.fftSize=1024;
+    source.connect(analyser);
+    data=new Uint8Array(analyser.fftSize);
+    micOn=true;
+    micBtn.textContent='🔴 关闭麦克风';
+    statusEl.textContent='麦克风已开启 · 对着麦克风吹气';
+    monitor();
+  }catch(e){
+    statusEl.textContent='无法使用麦克风：请允许权限，并使用 HTTPS 或 localhost 打开页面。';
+  }
+}
+function monitor(){
+  if(!micOn) return;
+  analyser.getByteTimeDomainData(data);
+  let sum=0;
+  for(let i=0;i<data.length;i++){ const v=(data[i]-128)/128; sum+=v*v; }
+  const rms=Math.sqrt(sum/data.length);
+  if(rms>0.18 && performance.now()-lastBlow>1200){
+    lastBlow=performance.now();
+    extinguish();
+    statusEl.textContent='💨 检测到吹气 · 蜡烛熄灭啦！';
+  }
+  raf=requestAnimationFrame(monitor);
+}
+micBtn.addEventListener('click',toggleMic);
+</script>
+</body>
+</html>
