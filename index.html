@@ -135,11 +135,13 @@ function extinguish(){
   play8BitBirthdaySong();
   burst();
 }
+
 function relight(){
   candles.forEach(c=>c.classList.remove('off'));
   message.textContent='许个愿，然后对着麦克风吹气 ♡';
   statusEl.textContent = micOn ? '麦克风已开启 · 再吹一下试试' : '麦克风关闭 · 点击按钮后允许浏览器使用麦克风';
 }
+
 function burst(){
   confetti.innerHTML='';
   for(let i=0;i<34;i++){
@@ -152,6 +154,7 @@ function burst(){
   }
   setTimeout(()=>confetti.innerHTML='',3500);
 }
+
 document.getElementById('stars').innerHTML = Array.from({length:34},(_,i)=>{
   const x=(i*37)%100, y=(i*61)%88, s=i%3?3:5;
   return `<i style="left:${x}%;top:${y}%;width:${s}px;height:${s}px"></i>`;
@@ -161,6 +164,7 @@ relightBtn.addEventListener('click', relight);
 
 let audioCtx=null, analyser=null, data=null, micOn=false, raf=null, stream=null;
 let lastBlow=0;
+
 async function toggleMic(){
   if(micOn){
     micOn=false;
@@ -172,36 +176,55 @@ async function toggleMic(){
     return;
   }
   try{
-    stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    const source=audioCtx.createMediaStreamSource(stream);
-    analyser=audioCtx.createAnalyser();
-    analyser.fftSize=1024;
+    // 关掉降噪，避免手机把吹气当作风噪给过滤掉
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
+    });
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // 确保手机端 AudioContext 被激活
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+
+    const source = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 1024;
     source.connect(analyser);
-    data=new Uint8Array(analyser.fftSize);
-    micOn=true;
-    micBtn.textContent='🔴 关闭麦克风';
-    statusEl.textContent='麦克风已开启 · 对着麦克风吹气';
+    data = new Uint8Array(analyser.fftSize);
+    micOn = true;
+    micBtn.textContent = '🔴 关闭麦克风';
+    statusEl.textContent = '麦克风已开启 · 对着麦克风吹气';
     monitor();
   }catch(e){
-    statusEl.textContent='无法使用麦克风：请允许权限，并使用 HTTPS 或 localhost 打开页面。';
+    statusEl.textContent = '无法使用麦克风：请允许权限，并使用 HTTPS 或 localhost 打开页面。';
   }
 }
+
 function monitor(){
   if(!micOn) return;
   analyser.getByteTimeDomainData(data);
   let sum=0;
   for(let i=0;i<data.length;i++){ const v=(data[i]-128)/128; sum+=v*v; }
   const rms=Math.sqrt(sum/data.length);
-  if(rms>0.18 && performance.now()-lastBlow>1200){
+  
+  // 将判定阈值调到 0.08，更贴合手机端采样灵敏度
+  if(rms > 0.08 && performance.now()-lastBlow > 1200){
     lastBlow=performance.now();
     extinguish();
     statusEl.textContent='💨 检测到吹气 · 蜡烛熄灭啦！';
   }
   raf=requestAnimationFrame(monitor);
 }
+
 micBtn.addEventListener('click',toggleMic);
-  function play8BitBirthdaySong() {
+
+function play8BitBirthdaySong() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
     const audioCtx = new AudioContext();
@@ -242,5 +265,3 @@ micBtn.addEventListener('click',toggleMic);
     });
 }
 </script>
-</body>
-</html>
