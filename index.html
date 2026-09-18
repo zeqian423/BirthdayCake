@@ -132,6 +132,7 @@ const confetti = document.getElementById('confetti');
 function extinguish(){
   candles.forEach(c=>c.classList.add('off'));
   message.textContent='愿望会实现的 ✦ HAPPY BIRTHDAY ✦';
+  play8BitBirthdaySong();
   burst();
 }
 function relight(){
@@ -200,6 +201,46 @@ function monitor(){
   raf=requestAnimationFrame(monitor);
 }
 micBtn.addEventListener('click',toggleMic);
+  function play8BitBirthdaySong() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const audioCtx = new AudioContext();
+
+    const notes = {
+        'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
+        'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
+        'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25
+    };
+
+    const melody = [
+        ['G3', 0.25], ['G3', 0.25], ['A3', 0.5], ['G3', 0.5], ['C4', 0.5], ['B3', 1.0],
+        ['G3', 0.25], ['G3', 0.25], ['A3', 0.5], ['G3', 0.5], ['D4', 0.5], ['C4', 1.0],
+        ['G3', 0.25], ['G3', 0.25], ['G4', 0.5], ['E4', 0.5], ['C4', 0.5], ['B3', 0.5], ['A3', 0.5],
+        ['F4', 0.25], ['F4', 0.25], ['E4', 0.5], ['C4', 0.5], ['D4', 0.5], ['C4', 1.0]
+    ];
+
+    let currentTime = audioCtx.currentTime;
+
+    melody.forEach(([note, duration]) => {
+        if (notes[note]) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'square';
+            osc.frequency.value = notes[note];
+
+            gain.gain.setValueAtTime(0.15, currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, currentTime + duration * 0.45);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(currentTime);
+            osc.stop(currentTime + duration * 0.48);
+        }
+        currentTime += duration * 0.5;
+    });
+}
 </script>
 </body>
 </html>
